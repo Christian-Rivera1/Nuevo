@@ -1,0 +1,104 @@
+{% extends "accounts/templates/accounts/base.html" %}
+{% block title %}
+SABANA PROYECT 
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 text-center">
+        <h1 class="mt-5">Visualización de Asignaciones</h1>
+        <p class="lead">A continuación se muestran las asignaciones de docentes a grados y secciones.</p>
+
+        <table class="table table-striped mt-4">
+            <thead>
+                <tr>
+                    <th>Docente</th>
+                    <th>Grado</th>
+                    <th>Sección</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asignacion in asignaciones %}
+                    <tr>
+                        <td>{{ asignacion.docente.nombreDocente }} {{ asignacion.docente.apellidoDocente }}</td>
+                        <td>{{ asignacion.grado_seccion.grado.nombreGrado }}</td>
+                        <td>{{ asignacion.grado_seccion.seccion.nombreSeccion }}</td>
+                        <td>
+                            <a href="{% url 'editarasignacion' asignacion.id %}" class="btn btn-sm btn-warning">Editar</a>
+                            <button id="eliminarAsignacionBtn" class="btn btn-sm btn-danger eliminarAsignacionBtn" data-id="{{ asignacion.id }}">Eliminar</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{% url 'home' %}" class="btn btn-secondary mt-4">Volver</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Selecciona todos los botones de eliminar
+        const eliminarBtns = document.querySelectorAll('.eliminarAsignacionBtn');
+
+        // Itera sobre cada botón y añade un evento click
+        eliminarBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const asignacionId = this.getAttribute('data-id'); // Obtener el id de la asignación
+
+                // Mostrar el SweetAlert2 de confirmación
+                Swal.fire({
+                    title: '¿Estás seguro de Eliminar esta Asignación?',
+                    text: "¡No podrás deshacer esta acción!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Si el usuario confirma, hacer una solicitud para eliminar la asignación
+                        fetch(`/{% url 'eliminarasignacion' 0 %}`.replace('0', asignacionId), {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': '{{ csrf_token }}', // Asegúrate de que el CSRF token esté disponible
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire(
+                                    'Eliminado!',
+                                    'La asignación ha sido eliminada correctamente.',
+                                    'success'
+                                ).then(() => {
+                                    // Recargar la página o eliminar la fila del HTML
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'Ocurrió un error al intentar eliminar la asignación.',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire(
+                                'Error!',
+                                'Ocurrió un error al intentar eliminar la asignación.',
+                                'error'
+                            );
+                        });
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

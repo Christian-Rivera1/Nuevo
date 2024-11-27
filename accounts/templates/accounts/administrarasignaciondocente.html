@@ -1,0 +1,85 @@
+{% extends "accounts/templates/accounts/base.html" %}
+{% block title %}
+SABANA PROYECT 
+{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 text-center">
+        <h1 class="mt-5">Administración de Asignaciones</h1>
+        <p class="lead">Completa el formulario para asignar un docente a un grado y sección.</p>
+
+        <form id="asignacionForm" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="mt-3">
+                <label for="selectDocente">Selecciona el docente:</label>
+                <select class="form-select" id="selectDocente" name="docente">
+                    <option value="" selected disabled>-- Selecciona un docente --</option>
+                    {% for docente in docentes %}
+                    <option value="{{ docente.dui }}">{{ docente.nombreDocente }} {{ docente.apellidoDocente }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mt-3">
+                <label for="selectGradoSeccion">Selecciona el grado y sección:</label>
+                <select class="form-select" id="selectGradoSeccion" name="grado_seccion">
+                    <option value="" selected disabled>-- Selecciona un grado y sección --</option>
+                    {% for grado_seccion in grados_secciones %}
+                        <option value="{{ grado_seccion.id_gradoseccion }}">{{ grado_seccion.grado.nombreGrado }} - {{ grado_seccion.seccion.nombreSeccion }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a href="{% url 'home' %}" class="btn btn-secondary">Volver</a>
+            </div>
+            
+            
+        </form>
+    </div>
+</div>
+
+
+
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.getElementById('asignacionForm').addEventListener('submit', function(event) {
+    var docente = document.getElementById('selectDocente').value;
+    var gradoSeccion = document.getElementById('selectGradoSeccion').value;
+    console.log("Docente seleccionado:", docente);
+    console.log("Grado sección seleccionado:", gradoSeccion);
+
+    if (docente === "" || gradoSeccion === "") {
+        event.preventDefault(); // Evitar el envío del formulario
+        Swal.fire({
+            title: "Error",
+            text: "Por favor selecciona un docente y un grado y sección antes de guardar.",
+            icon: "error"
+        });
+    }
+});
+
+{% if messages %}
+    {% for message in messages %}
+        {% if message.tags == 'success' %}
+            Swal.fire({
+                title: "Éxito",
+                text: "{{ message }}",
+                icon: "success",
+            });
+        {% elif message.tags == 'error' %}
+            Swal.fire({
+                title: "Error",
+                text: "{{ message }}",
+                icon: "error",
+                customClass: {
+                    title: "text-danger"
+                }
+            });
+        {% endif %}
+    {% endfor %}
+{% endif %} 
+</script>
+{% endblock %}

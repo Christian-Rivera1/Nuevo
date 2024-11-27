@@ -1,0 +1,55 @@
+{% extends "accounts/templates/accounts/base.html" %}
+{% block title %}Lista de Horarios Clases{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Lista de Horarios de Clases Asignados a cada Docente</h1>
+
+    <!-- Formulario de búsqueda centrado -->
+    <form method="GET" class="d-flex justify-content-center mb-4">
+        <div class="input-group w-50">
+            <input type="text" name="search" class="form-control" placeholder="Buscar horarios por nombre o grado" value="{{ search_query }}">
+            <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+        </div>
+    </form>
+
+    <!-- Tabla de horarios -->
+    <table class="table table-striped table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Docente</th>
+                <th>Materia</th>
+                <th>Grado</th>
+                <th>Seccion</th>
+                <th>Ver Horarios</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for docente_materia in docente_materias %}
+            <tr>
+                <td>{{ docente_materia.dui.nombreDocente }} {{ docente_materia.dui.apellidoDocente }}</td>
+                <td>{{ docente_materia.id_matrgrasec.id_materia.nombre_materia }}</td>
+                <td>{{ docente_materia.id_matrgrasec.id_gradoseccion.grado.nombreGrado }}</td>
+                <td>{{ docente_materia.id_matrgrasec.id_gradoseccion.seccion.nombreSeccion }}</td>
+                <td>
+                    <a href="{% url 'ver_horarios' docente_materia.id_doc_mat_grado %}" class="btn btn-outline-primary">Visualizar</a>
+                </td>
+                <td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No hay docentes o materias que coincidan con la búsqueda.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between mt-4">
+        <a href="{% url 'agregar_horario' %}" class="btn btn-success">Agregar Nuevo Horario</a>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Volver al menú principal</a>
+    </div>
+</div>
+{% endblock %}
+
+
